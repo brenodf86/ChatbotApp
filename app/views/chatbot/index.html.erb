@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot App</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i&display=swap&subset=cyrillic,greek" rel="stylesheet">
+  <style>
+      body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+
+    #chatbox {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+    }
+
+    .message-container {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .message {
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+      max-width: 70%;
+    }
+
+    .user {
+      background-color: #f0f0f0;
+    }
+
+    .bot {
+      background-color: #e0f4ff;
+    }
+
+    #user-input {
+      width: 80%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    #send-button {
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <div class="content" id="chatbox">
+    <!-- Aqui é onde as mensagens do chatbot serão exibidas -->
+  </div>
+  <input type="text" id="user-input" placeholder="Digite sua mensagem..." />
+  <button id="send-button">Enviar</button>
+  
+  <script>
+    const chatbox = document.getElementById('chatbox');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+
+    // Função para receber e exibir a resposta do chatbot
+    function receiveMessage(message, isUser) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add(isUser ? 'user' : 'bot');
+      messageElement.textContent = message;
+      chatbox.appendChild(messageElement);
+    }
+
+    // Função para enviar mensagem do usuário ao chatbot
+    function sendMessage() {
+      const userMessage = userInput.value;
+
+      // Exibir a mensagem de boas-vindas apenas na primeira interação
+      if (!userInput.dataset.welcomed) {
+        receiveMessage(`Bot: Bem-vindo ao Chatbot!`, false);
+        userInput.dataset.welcomed = true; // Marcar como já recebido
+      }
+
+      // Exibir a mensagem do usuário no chatbox
+      receiveMessage(`Você: ${userMessage}`, true);
+
+      // Chamada AJAX para enviar mensagem para o backend
+      $.ajax({
+        url: '/webhook', // Coloque aqui o caminho correto para o endpoint de webhook no seu aplicativo Rails
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          message: userMessage
+        }),
+        success: function(response) {
+          // Exibir a resposta do chatbot no chatbox
+          receiveMessage(`Bot: ${response.response}`, false);
+        }
+      });
+
+      // Limpar a entrada do usuário após o envio
+      userInput.value = '';
+    }
+
+    // Adicionar evento de clique ao botão Enviar
+    sendButton.addEventListener('click', sendMessage);
+  </script>
+</body>
+</html>
+
+
+
+
